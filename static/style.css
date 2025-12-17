@@ -1,0 +1,728 @@
+/* ==============================================================================
+   ANEMO - Application Styles
+   ==============================================================================
+   Purpose: Clinical interface design for anemia detection system
+   Typography: Libre Baskerville (body), Helvetica (UI elements)
+   Color Scheme: Warm neutrals with accent green and status colors
+   ============================================================================== */
+
+/* ==============================================================================
+   CSS Variables - Design Tokens
+   ============================================================================== */
+
+html { 
+    background-color: var(--bg-body);
+}
+
+:root {
+    /* Primary Brand Colors */
+    --accent: #0F3D2E;  
+    --accent-hover: #1A523F;
+    
+    /* Background Colors */
+    --bg-body: #FAF9F6;
+    --bg-card: #FDFCF8;
+    
+    /* Text Colors */
+    --text-main: #111827;
+    --text-muted: #6B7280;
+    
+    /* Border Colors */
+    --border: #E5E7EB;
+    
+    /* Footer Colors */
+    --bg-footer: #1F2937;
+    --text-footer: #D1D5DB;
+
+    /* Status Colors */
+    --danger: #DC2626;
+    --safe: #059669;
+}
+
+/* ==============================================================================
+   Global Reset
+   ============================================================================== */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+/* ==============================================================================
+   Animations
+   ============================================================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ==============================================================================
+   Base Styles
+   ============================================================================== */
+
+body {
+    font-family: 'Helvetica', Arial, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ==============================================================================
+   Top Navigation Bar
+   ============================================================================== */
+.top-bar {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(0);
+    z-index: 100;
+    width: calc(100% - 48px);
+    max-width: 1200px;
+    height: 72px;
+    background: rgba(253, 252, 248, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    animation: slideDown 0.6s ease-out;
+    will-change: transform;
+    backface-visibility: hidden;
+    transition: transform 0.24s ease;
+}
+
+.top-bar.is-hidden {
+    transform: translateX(-50%) translateY(-120%) translateZ(0);
+}
+
+.brand { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 1.25rem; color: var(--accent); display: flex; gap: 10px; align-items: center; }
+.system-status { font-size: 0.8rem; color: var(--safe); display: flex; align-items: center; gap: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-dot { width: 8px; height: 8px; background: var(--safe); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+
+/* ==============================================================================
+   Main Dashboard Layout
+   ============================================================================== */
+.dashboard {
+    max-width: 1200px;
+    width: 100%;
+    padding: 0 32px;
+    
+    /* Centering Logic */
+    margin: 0 auto; 
+    min-height: 100vh; /* Takes full viewport height */
+    
+    /* Flex column to center content vertically */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertical Center */
+    
+    /* Padding to account for fixed top bar */
+    padding-top: 120px; 
+    padding-bottom: 64px;
+}
+
+/* The Grid Container */
+.grid-wrapper {
+    display: grid;
+    /* 3 Columns: Left | Middle | Right */
+    grid-template-columns: 360px 380px 1fr; 
+    gap: 32px; /* Increased Gap */
+    align-items: stretch;
+    width: 100%;
+}
+
+/* Note: I added a wrapper in CSS to handle the grid logic while .dashboard handles full-page centering 
+   But since we can't change HTML structure drastically, let's apply grid directly to .dashboard 
+   and use margins for centering */
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 360px 380px 1fr; 
+    gap: 32px;
+    align-items: stretch;
+    margin-top: 15vh; /* Push down to visually center on load */
+    margin-bottom: 10vh;
+    min-height: auto; /* Reset flex min-height */
+}
+
+/* Common Card Styles */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px; /* More internal padding */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    animation: fadeInUp 0.6s ease-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+}
+
+.col-imaging .card { animation-delay: 0.1s; }
+.col-report .card:nth-child(1) { animation-delay: 0.2s; }
+.col-report .card:nth-child(2) { animation-delay: 0.3s; }
+.col-report .card:nth-child(3) { animation-delay: 0.4s; }
+.col-logs .card { animation-delay: 0.5s; }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.card-label { 
+    font-size: 0.7rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    color: var(--text-muted); 
+    font-weight: 700; 
+}
+
+/* --- Column 1: Imaging --- */
+.col-imaging { display: flex; flex-direction: column; height: 100%; }
+.col-imaging .card { height: 100%; justify-content: space-between; }
+
+.image-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 24px;
+    min-height: 0; 
+}
+
+.image-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #F3F4F6;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container img { 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%; 
+    max-height: 100%; 
+    width: auto;
+    height: auto;
+    object-fit: contain; 
+    display: block; 
+}
+.placeholder { text-align: center; color: var(--text-muted); animation: fadeIn 0.5s ease-in; }
+.placeholder i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; animation: pulse 3s ease-in-out infinite; }
+
+.controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; margin-bottom: 16px;}
+
+/* ==============================================================================
+   Buttons and Controls
+   ============================================================================== */
+
+button { cursor: pointer; border-radius: 4px; font-size: 0.9rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 48px; font-weight: 600; }
+
+.btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); font-weight: 500; }
+.btn-secondary:hover { border-color: var(--text-muted); background: #F9FAFB; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.btn-secondary:active { transform: translateY(0); }
+
+.btn-primary { background: var(--accent); color: white; border: none; width: 100%; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15, 61, 46, 0.3); }
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ==============================================================================
+   Column 2: Analysis Results and Reports
+   ============================================================================== */
+.col-report { display: flex; flex-direction: column; gap: 24px; height: 100%; }
+.report-card { justify-content: space-between; min-height: 160px; }
+.action-card { margin-top: auto; }
+
+/* FIX: Risk Meter Alignment */
+.risk-meter-container { 
+    position: relative; 
+    height: 12px; 
+    margin: 20px 0; 
+    width: 100%; 
+}
+.risk-track { 
+    position: absolute; /* Lock position */
+    top: 0; left: 0;
+    width: 100%; 
+    height: 100%; 
+    background: #E5E7EB; 
+    border-radius: 6px; 
+}
+.risk-fill { 
+    position: absolute; /* Lock position on top of track */
+    top: 0; left: 0;
+    height: 100%; 
+    background: var(--accent); 
+    width: 0%; 
+    border-radius: 6px; 
+    transition: width 0.5s ease; 
+}
+.risk-marker { 
+    position: absolute; 
+    top: -6px; 
+    width: 4px; 
+    height: 24px; 
+    background: #111827; 
+    transform: translateX(-50%); 
+    transition: left 0.5s ease; 
+    z-index: 2;
+}
+
+.risk-values { display: flex; justify-content: space-between; font-size: 0.8rem; align-items: baseline; }
+.big-number { font-family: 'Libre Baskerville', serif; font-size: 2.5rem; font-weight: 700; color: var(--text-main); line-height: 1; }
+
+#diagnosisLabel { font-family: 'Libre Baskerville', serif; font-size: 2rem; margin: 0; line-height: 1.2; }
+.stat-row h2 { font-family: 'Libre Baskerville', serif; font-size: 2.5rem; font-weight: 700; color: var(--text-main); line-height: 1; }
+.subtext { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
+
+.action-card { padding: 0; border: none; background: transparent; box-shadow: none; min-height: auto; margin-top: 24px; }
+.btn-download { background: #1F2937; color: white; width: 100%; height: 56px; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.95rem; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; }
+.btn-download:hover { background: #374151; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(31, 41, 55, 0.4); }
+.btn-download:active { transform: translateY(0); }
+
+/* ==============================================================================
+   Column 3: Session Logs
+   ============================================================================== */
+.col-logs { display: flex; flex-direction: column; height: 100%; }
+
+.col-logs .card {
+    display: flex;
+    flex-direction: column;
+    /* Remove gaps so list handles spacing */
+    gap: 0;
+    height: 100%;
+    max-height: 680px;
+}
+.col-logs .card-header { margin-bottom: 16px; }
+
+/* FIX: Scrolling Log List */
+.log-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    
+    /* Flex grows to fill, scrolls when content exceeds */
+    flex: 1;
+    overflow-y: scroll;
+    min-height: 0;
+    
+    padding-right: 8px;
+}
+
+.log-item { background: #F9FAFB; border: 1px solid var(--border); padding: 16px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: fadeInUp 0.4s ease-out; }
+.log-item:hover { border-color: var(--accent); transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: white; }
+.log-meta { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text-muted); font-size: 0.75rem; }
+.log-result { font-weight: 700; }
+.empty-state { color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: 40px 20px; text-align: center; }
+
+/* ==============================================================================
+   Footer - Project Information (Below Fold)
+   ============================================================================== */
+.app-footer {
+    background: var(--bg-footer); 
+    color: var(--text-footer);
+    min-height: 80vh; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 96px 48px;
+    margin-top: 15vh; /* Ensure gap between dashboard and footer */
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-content { 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 48px; 
+    width: 100%; 
+}
+
+.footer-col h4 { 
+    font-family: 'Libre Baskerville', serif;
+    color: white; 
+    margin-bottom: 32px; 
+    font-size: 1.125rem; 
+    font-weight: 700; 
+    letter-spacing: 0.5px; 
+    text-transform: uppercase;
+}
+
+.footer-col p, .footer-col ul { 
+    font-size: 1rem; 
+    line-height: 1.8; 
+    opacity: 0.85;
+}
+
+.footer-col ul { 
+    list-style: none; 
+    padding-left: 0; 
+}
+
+.footer-col li { 
+    margin-bottom: 12px; 
+    transition: opacity 0.2s;
+}
+
+.footer-col li:hover { 
+    opacity: 1;
+}
+
+.copyright { 
+    text-align: center; 
+    font-size: 0.875rem; 
+    opacity: 0.4; 
+    margin-top: 96px; 
+    border-top: 1px solid rgba(255,255,255,0.08); 
+    padding-top: 48px; 
+    letter-spacing: 0.5px;
+}
+
+/* ==============================================================================
+   Modal - Log Detail View
+   ============================================================================== */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+.modal.hidden { display: none; }
+.modal-content { background: var(--bg-card); padding: 32px; border-radius: 8px; width: 420px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center; }
+.close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; height: auto; }
+.modal-body img { width: 100%; border-radius: 4px; margin-bottom: 24px; border: 1px solid var(--border); }
+.modal-stats { display: flex; justify-content: space-between; margin-bottom: 24px; }
+.modal-note { font-size: 0.85rem; color: var(--text-muted); background: #F3F4F6; padding: 16px; border-radius: 4px; }
+
+/* Camera Modal Specific Styles */
+.camera-modal-content {
+    width: 640px;
+    max-width: 90%;
+}
+
+.camera-container {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+#cameraVideo {
+    width: 100%;
+    height: auto;
+    display: block;
+    transform: scaleX(-1); /* Mirror effect for front camera */
+}
+
+#cameraCanvas {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.camera-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.camera-controls button {
+    flex: 1;
+    max-width: 200px;
+}
+
+/* ==============================================================================
+   Heatmap and Explainability Cards
+   ============================================================================== */
+.col-heatmap {
+    grid-column: 1 / 3;
+    animation: fadeInUp 0.5s ease-out 0.6s backwards;
+}
+
+.col-heatmap .card {
+    display: flex;
+    flex-direction: column;
+}
+
+.heatmap-card { gap: 16px; }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card-pill {
+    background: #EEF2FF;
+    color: var(--accent);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.heatmap-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 260px;
+    background: #F9FAFB;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px dashed var(--border);
+    padding: 12px;
+}
+
+.heatmap-container img {
+    max-width: 100%;
+    max-height: 400px;
+    display: block;
+}
+
+.heatmap-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    text-align: center;
+}
+
+.heatmap-disclaimer {
+    background: #F7F7F8;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.heatmap-disclaimer h4 {
+    margin-bottom: 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+    letter-spacing: 0.2px;
+}
+
+/* ==============================================================================
+   Responsive Design - Mobile/Tablet
+   ============================================================================== */
+@media (max-width: 1024px) {
+    .dashboard { grid-template-columns: 1fr; max-width: 600px; margin: 120px auto 32px; gap: 24px; padding: 0 16px; display: grid; }
+    .top-bar { width: calc(100% - 32px); padding: 0 16px; }
+    .footer-content { grid-template-columns: 1fr; gap: 32px; text-align: center; }
+    
+    .col-heatmap { grid-column: 1; }
+    .col-heatmap { margin-bottom: 16px; }
+    
+    /* Camera modal adjustments for mobile */
+    .camera-modal-content {
+        width: 95%;
+        padding: 16px;
+    }
+    
+    .camera-controls {
+        flex-direction: column;
+    }
+    
+    .camera-controls button {
+        max-width: none;
+    }
+}
+
+/* ==============================================================================
+   Utility Classes
+   ============================================================================== */
+.text-danger { color: var(--danger); }
+.text-safe { color: var(--safe); }
+.bg-danger { background-color: var(--danger); }
+.bg-safe { background-color: var(--safe); }
+.hidden { display: none !important; }
+
+/* ==============================================================================
+   Print Styles - Hide UI chrome, show only content
+   ============================================================================== */
+@media print {
+    /* Set print margins and page size */
+    @page {
+        margin: 0.5cm;
+        size: A4 portrait;
+    }
+    
+    /* Hide navigation and footer */
+    .top-bar { display: none !important; }
+    .app-footer { display: none !important; }
+    
+    /* Hide session logs column */
+    .col-logs { display: none !important; }
+    
+    /* Hide action buttons and modals */
+    .action-card { display: none !important; }
+    .modal { display: none !important; }
+    .camera-modal { display: none !important; }
+    
+    /* Adjust main content layout for print */
+    main.dashboard {
+        display: block;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100%;
+        width: 100%;
+        min-height: auto;
+    }
+    
+    /* Single column layout */
+    .col-imaging,
+    .col-report,
+    .col-heatmap {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        margin-bottom: 15px !important;
+    }
+    
+    /* Reset grid for print */
+    main.dashboard {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    
+    /* Clean up card spacing */
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #E5E7EB;
+        margin-bottom: 10px;
+        padding: 15px !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Hide upload controls in print */
+    .controls-grid { display: none !important; }
+    .btn-primary, .btn-secondary, .btn-download { display: none !important; }
+    
+    /* Hide disclaimer and unnecessary info */
+    .placeholder { display: none !important; }
+    .heatmap-disclaimer { display: none !important; }
+    
+    /* Compact card headers */
+    .card-header {
+        margin-bottom: 8px !important;
+    }
+    
+    .card-label {
+        font-size: 0.85rem !important;
+    }
+    
+    /* Optimize image sizing */
+    .image-wrapper,
+    #clinicalImage {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        page-break-inside: avoid;
+    }
+    
+    #clinicalImage {
+        max-height: 250px;
+        object-fit: contain;
+    }
+    
+    /* Compact heatmap */
+    #heatmapContainer img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+    }
+    
+    /* Reduce font sizes for print */
+    body { 
+        background: white !important;
+        color: #000;
+        font-size: 10pt;
+    }
+    
+    h1 { font-size: 1.2rem !important; }
+    h2 { font-size: 1rem !important; }
+    
+    /* Compact results display */
+    .risk-meter-container { height: 30px !important; }
+    .risk-values { margin-top: 5px; }
+    .risk-values span { font-size: 0.9rem !important; }
+    
+    .big-number { font-size: 1.8rem !important; }
+    .stat-row h2 { font-size: 1.8rem !important; }
+    
+    /* Remove animations */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

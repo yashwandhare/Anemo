@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+==============================================================================
+ANEMO - Anemia Detection System
+==============================================================================
+Purpose: Clinical research tool for automated conjunctiva analysis
+Architecture: YOLOv8 detection + MobileNetV2 classification
+Security: Client-side validation, file type/size checks
+==============================================================================
+-->
+<head>
+    <!-- Meta Information -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ANEMO - Automated anemia detection from conjunctiva images">
+    <meta name="robots" content="noindex, nofollow">
+    <title>ANEMO | Clinical Research Tool</title>
+    
+    <!-- Font Preloading for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/style.css?v=20251216">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <meta http-equiv="Content-Security-Policy"
+      content="
+      default-src 'self';
+      img-src 'self' data: blob:;
+      script-src 'self';
+      style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+      font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+      connect-src 'self';
+      ">
+
+</head>
+<body>
+
+    <!-- ==================================================================== -->
+    <!-- Top Navigation Bar                                                   -->
+    <!-- ==================================================================== -->
+    <nav class="top-bar">
+        <div class="brand">
+            <i class="fa-solid fa-staff-snake"></i>
+            <span>ANEMO</span>
+        </div>
+        <div class="system-status">
+            <span class="status-dot"></span> System Ready
+        </div>
+    </nav>
+
+    <!-- ==================================================================== -->
+    <!-- Main Dashboard - 3 Column Grid Layout                               -->
+    <!-- ==================================================================== -->
+    <main class="dashboard">
+        
+        <!-- Column 1: Image Upload and Analysis Controls -->
+        <section class="col-imaging">
+            <div class="card">
+                <!-- Image Display Area -->
+                <div class="image-wrapper">
+                    <div class="image-container" id="dropZone">
+                        <!-- Placeholder shown when no image loaded -->
+                        <div class="placeholder" id="placeholder">
+                            <i class="fa-solid fa-microscope"></i>
+                            <p>Load Subject Image</p>
+                        </div>
+                        <!-- Uploaded/analyzed image -->
+                        <img id="clinicalImage" class="hidden" src="" alt="Subject Analysis">
+                    </div>
+                </div>
+                
+                <!-- Upload Control Buttons -->
+                <div class="controls-grid">
+                    <button class="btn-secondary" id="cameraBtn">
+                        <i class="fa-solid fa-camera"></i> CAMERA
+                    </button>
+                    <button class="btn-secondary" id="uploadBtn">
+                        <i class="fa-solid fa-upload"></i> UPLOAD
+                    </button>
+                </div>
+
+                <!-- Analysis Trigger Button -->
+                <button class="btn-primary" id="analyzeBtn" disabled>
+                    RUN ANALYSIS
+                </button>
+            </div>
+            
+            <!-- Hidden File Input Elements -->
+            <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" hidden>
+            <input type="file" id="cameraInput" accept="image/jpeg,image/jpg,image/png,image/webp" capture="environment" hidden>
+        </section>
+
+        <!-- Column 2: Analysis Results and Reports -->
+        <section class="col-report">
+            <!-- Risk Meter Card -->
+            <div class="card report-card">
+                <div class="card-header">
+                    <span class="card-label">Anemia Risk Index</span>
+                </div>
+                <!-- Animated risk visualization -->
+                <div class="risk-meter-container">
+                    <div class="risk-track"></div>
+                    <div class="risk-fill" id="riskFill"></div>
+                    <div class="risk-marker" id="riskMarker"></div>
+                </div>
+                <div class="risk-values">
+                    <span>Low</span>
+                    <span id="riskScoreDisplay" class="big-number">--</span>
+                    <span>High</span>
+                </div>
+            </div>
+
+            <!-- Primary Diagnosis Card -->
+            <div class="card report-card highlight-card">
+                <div class="card-header">
+                    <span class="card-label">Classification</span>
+                </div>
+                <h1 id="diagnosisLabel">---</h1>
+            </div>
+
+            <!-- Confidence Score Card -->
+            <div class="card report-card">
+                <div class="card-header">
+                    <span class="card-label">Model Confidence</span>
+                </div>
+                <div class="stat-row">
+                    <h2 id="confValue">--%</h2>
+                    <p class="subtext">CNN Probability</p>
+                </div>
+            </div>
+
+            <!-- Report Download Action -->
+            <div class="action-card">
+                <button class="btn-download" id="downloadBtn">
+                    <i class="fa-solid fa-file-pdf"></i> DOWNLOAD REPORT
+                </button>
+            </div>
+        </section>
+
+        <!-- Column 3: Session History Logs -->
+        <section class="col-logs">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-label">Session Logs</span>
+                </div>
+                <!-- Scrollable log container -->
+                <div class="log-list" id="logList">
+                    <div class="empty-state">No records this session.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Heatmap + Disclaimer (spans col-imaging + col-report width) -->
+        <section class="col-heatmap">
+            <div class="card heatmap-card">
+                <div class="card-header">
+                    <span class="card-label">Visual Features</span>
+                    <span class="card-pill">Grad-CAM</span>
+                </div>
+                <div class="heatmap-container" id="heatmapContainer">
+                    <p class="heatmap-info">Upload an image to view the Grad-CAM overlay.</p>
+                </div>
+                <div class="heatmap-disclaimer">
+                    <h4>Interpretation Notes</h4>
+                    <p>
+                        The overlay highlights regions that influenced the model's prediction. It is a transparency aid
+                        and not a medical interpretation or diagnosis. Confirm all findings with standard clinical
+                        methods.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================================================================== -->
+    <!-- Footer - Project Information (Below Fold)                           -->
+    <!-- ==================================================================== -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>ANEMO</h4>
+                <p>Automated Conjunctiva Analysis Tool for anemia screening research.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Disclaimer</h4>
+                <p><strong>Investigational Device.</strong> This tool is for screening purposes only. Results must be verified by a standard CBC blood test.</p>
+            </div>
+            <div class="footer-col">
+                <h4>ML Arch</h4>
+                <ul>
+                    <li>YOLOv8 (Region Detection)</li>
+                    <li>MobileNetV2 (Classification)</li>
+                    <li>OpenCV (Preprocessing)</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Stack</h4>
+                <ul>
+                    <li>Python / FastAPI</li>
+                    <li>TensorFlow / Keras</li>
+                    <li>Vanilla JS Frontend</li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>GitHub</h4>
+                <p>Repository: <span aria-label="GitHub repository placeholder">(pending)</span></p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 ANEMO Project.
+        </div>
+    </footer>
+
+    <!-- ==================================================================== -->
+    <!-- Modal - Log Record Detail View                                      -->
+    <!-- ==================================================================== -->
+    <div id="logModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Log Record</h3>
+                <button id="closeModalBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Analysis result image -->
+                <img id="modalImg" src="" alt="Log Image">
+                <!-- Result statistics -->
+                <div class="modal-stats">
+                    <div class="stat-box">
+                        <label>Classification</label>
+                        <h2 id="modalClass">--</h2>
+                    </div>
+                    <div class="stat-box">
+                        <label>Confidence</label>
+                        <h2 id="modalConf">--</h2>
+                    </div>
+                    <div class="stat-box">
+                        <label>Risk Index</label>
+                        <h2 id="modalRisk">--</h2>
+                    </div>
+                </div>
+                <!-- Additional notes -->
+                <p id="modalNote" class="modal-note"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- Modal - Live Camera Capture (Optional for Desktop)                  -->
+    <!-- ==================================================================== -->
+    <div id="cameraModal" class="modal hidden">
+        <div class="modal-content camera-modal-content">
+            <div class="modal-header">
+                <h3>Capture Image</h3>
+                <button id="closeCameraBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="camera-container">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <canvas id="cameraCanvas" class="hidden"></canvas>
+                </div>
+                <div class="camera-controls">
+                    <button class="btn-secondary" id="captureBtn">
+                        <i class="fa-solid fa-camera"></i> CAPTURE
+                    </button>
+                    <button class="btn-secondary hidden" id="retakeBtn">
+                        <i class="fa-solid fa-rotate-left"></i> RETAKE
+                    </button>
+                    <button class="btn-primary hidden" id="useCaptureBtn">
+                        USE THIS PHOTO
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript -->
+    <script src="/static/app.js?v=20251216"></script>
+</body>
+</html>
