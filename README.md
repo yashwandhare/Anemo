@@ -111,3 +111,10 @@ source anemia-venv/bin/activate
 pip install -r requirements.txt
 
 uvicorn src.api:app --reload
+```
+
+---
+
+## Demo
+
+![ANEMO Demo](anemo.gif)

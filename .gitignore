@@ -143,3 +143,4 @@ results/*
 *.pth
 *.pkl
 *.pickle
+anemo.gif
