@@ -115,6 +115,14 @@ uvicorn src.api:app --reload
 
 ---
 
+## References
+
+1. **Deep Learning Model-Based Detection of Anemia from Conjunctiva Images**  
+   Sehar, Krishnamoorthi & Kumar (2025)  
+   [PubMed](https://pubmed.ncbi.nlm.nih.gov/39973037/)
+
+---
+
 ## Demo
 
 ![ANEMO Demo](anemo.gif)
